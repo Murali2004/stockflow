@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import {
   Package,
   Layers,
-  DollarSign,
+  IndianRupee,
   AlertTriangle,
   TrendingDown,
   ArrowRight,
@@ -28,37 +28,37 @@ interface DashboardStats {
   lowStockProducts: LowStockProduct[]
 }
 
+type CardColor = 'teal' | 'blue' | 'violet' | 'red'
+
+const colorMap: Record<CardColor, { icon: string; border: string }> = {
+  teal:   { icon: 'bg-teal-100 text-teal-600',     border: 'border-l-teal-500' },
+  blue:   { icon: 'bg-blue-100 text-blue-600',     border: 'border-l-blue-500' },
+  violet: { icon: 'bg-violet-100 text-violet-600', border: 'border-l-violet-500' },
+  red:    { icon: 'bg-red-100 text-red-600',       border: 'border-l-red-500' },
+}
+
 function StatCard({
   icon: Icon,
   label,
   value,
   sub,
-  accent,
+  color = 'teal',
 }: {
   icon: React.ElementType
   label: string
   value: string
   sub?: string
-  accent?: boolean
+  color?: CardColor
 }) {
+  const c = colorMap[color]
   return (
-    <div
-      className={`rounded-xl border p-5 flex items-start gap-4 bg-white shadow-sm ${
-        accent ? 'border-red-200 bg-red-50/40' : 'border-gray-100'
-      }`}
-    >
-      <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-          accent ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'
-        }`}
-      >
+    <div className={`rounded-xl border border-gray-100 border-l-4 ${c.border} p-5 flex items-start gap-4 bg-white shadow-sm`}>
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${c.icon}`}>
         <Icon className="h-5 w-5" />
       </div>
       <div className="min-w-0">
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
-        <p className={`mt-1 text-2xl font-bold tracking-tight ${accent ? 'text-red-700' : 'text-gray-900'}`}>
-          {value}
-        </p>
+        <p className="mt-1 text-2xl font-bold tracking-tight text-gray-900">{value}</p>
         {sub && <p className="mt-0.5 text-xs text-gray-400">{sub}</p>}
       </div>
     </div>
@@ -95,9 +95,9 @@ export default function DashboardPage() {
     )
   }
 
-  const formattedValue = new Intl.NumberFormat('en-US', {
+  const formattedValue = new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'INR',
     maximumFractionDigits: 0,
   }).format(stats.totalValue)
 
@@ -111,20 +111,15 @@ export default function DashboardPage() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Package} label="Total products" value={String(stats.totalProducts)} />
-        <StatCard icon={Layers} label="Units in stock" value={String(stats.totalQuantity)} sub="across all products" />
-        <StatCard
-          icon={DollarSign}
-          label="Inventory value"
-          value={formattedValue}
-          sub="cost price basis"
-        />
+        <StatCard icon={Package} label="Total products" value={String(stats.totalProducts)} color="teal" />
+        <StatCard icon={Layers} label="Units in stock" value={String(stats.totalQuantity)} sub="across all products" color="blue" />
+        <StatCard icon={IndianRupee} label="Inventory value" value={formattedValue} sub="cost price basis" color="violet" />
         <StatCard
           icon={AlertTriangle}
           label="Low stock alerts"
           value={String(stats.lowStockCount)}
           sub={stats.lowStockCount === 0 ? 'All good!' : 'Need attention'}
-          accent={stats.lowStockCount > 0}
+          color={stats.lowStockCount > 0 ? 'red' : 'teal'}
         />
       </div>
 
@@ -190,7 +185,7 @@ export default function DashboardPage() {
                   <td className="px-6 py-3.5 text-right text-gray-400">{p.threshold}</td>
                   <td className="px-6 py-3.5 text-right">
                     <Link
-                      href={`/products/${p.id}/edit`}
+                      href="/products"
                       className="text-xs font-medium text-primary hover:underline"
                     >
                       Restock

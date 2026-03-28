@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import { signToken, buildSessionCookie } from '@/lib/auth'
 import { loginSchema } from '@/lib/validations'
+import { okWithCookie, err } from '@/lib/api-response'
 
 /**
  * POST /api/auth/login
@@ -24,10 +25,8 @@ export async function POST(request: NextRequest) {
     // Step 1: Validate input
     const result = loginSchema.safeParse(body)
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error.issues[0].message },
-        { status: 400 }
-      )
+      // Zod v4 uses .issues instead of .errors
+      return err(result.error.issues[0].message, 400)
     }
 
     const { email, password } = result.data
@@ -39,27 +38,15 @@ export async function POST(request: NextRequest) {
     // password intentionally avoids leaking whether the email exists
     const isValid = user ? await bcrypt.compare(password, user.passwordHash) : false
     if (!user || !isValid) {
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
-      )
+      return err('Invalid email or password', 401)
     }
 
     // Step 4: Sign JWT with userId and orgId, set session cookie
     const token = await signToken({ userId: user.id, orgId: user.orgId })
 
-    return NextResponse.json(
-      { message: 'Logged in successfully' },
-      {
-        status: 200,
-        headers: { 'Set-Cookie': buildSessionCookie(token) },
-      }
-    )
+    return okWithCookie(undefined, 'Logged in successfully', buildSessionCookie(token), 200)
   } catch (error) {
     console.error('[login]', error)
-    return NextResponse.json(
-      { error: 'Something went wrong. Please try again.' },
-      { status: 500 }
-    )
+    return err('Something went wrong. Please try again.', 500)
   }
 }

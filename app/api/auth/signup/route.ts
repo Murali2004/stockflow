@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import { signToken, buildSessionCookie } from '@/lib/auth'
 import { signupSchema } from '@/lib/validations'
 import { BCRYPT_SALT_ROUNDS } from '@/lib/constants'
+import { okWithCookie, err } from '@/lib/api-response'
 
 /**
  * POST /api/auth/signup
@@ -24,10 +25,7 @@ export async function POST(request: NextRequest) {
     const result = signupSchema.safeParse(body)
     if (!result.success) {
       // Zod v4 uses .issues instead of .errors
-      return NextResponse.json(
-        { error: result.error.issues[0].message },
-        { status: 400 }
-      )
+      return err(result.error.issues[0].message, 400)
     }
 
     const { email, password, orgName } = result.data
@@ -35,10 +33,7 @@ export async function POST(request: NextRequest) {
     // Step 2: Check for existing user
     const existingUser = await db.user.findUnique({ where: { email } })
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'An account with this email already exists' },
-        { status: 409 }
-      )
+      return err('An account with this email already exists', 409)
     }
 
     // Step 3: Hash password using configured salt rounds
@@ -65,18 +60,9 @@ export async function POST(request: NextRequest) {
     // Step 5: Sign JWT and attach session cookie to response
     const token = await signToken({ userId: user.id, orgId: org.id })
 
-    return NextResponse.json(
-      { message: 'Account created successfully' },
-      {
-        status: 201,
-        headers: { 'Set-Cookie': buildSessionCookie(token) },
-      }
-    )
+    return okWithCookie(undefined, 'Account created successfully', buildSessionCookie(token), 201)
   } catch (error) {
     console.error('[signup]', error)
-    return NextResponse.json(
-      { error: 'Something went wrong. Please try again.' },
-      { status: 500 }
-    )
+    return err('Something went wrong. Please try again.', 500)
   }
 }

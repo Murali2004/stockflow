@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { okWithCookie } from '@/lib/api-response'
 import { buildClearCookie } from '@/lib/auth'
 
 /**
@@ -9,12 +9,6 @@ import { buildClearCookie } from '@/lib/auth'
  * but the cookie deletion means the browser will not send it again.
  */
 export async function POST() {
-  return NextResponse.json(
-    { message: 'Logged out successfully' },
-    {
-      status: 200,
-      // Max-Age=0 instructs the browser to delete the cookie immediately
-      headers: { 'Set-Cookie': buildClearCookie() },
-    }
-  )
+  // Max-Age=0 instructs the browser to delete the cookie immediately
+  return okWithCookie(undefined, 'Logged out successfully', buildClearCookie(), 200)
 }

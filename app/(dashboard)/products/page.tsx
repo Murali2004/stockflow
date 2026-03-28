@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Package, Plus, Search, Pencil, Trash2, AlertTriangle } from 'lucide-react'
+import { Package, Plus, Search, Pencil, Trash2, AlertTriangle, SlidersHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import ProductFormModal from './_components/ProductFormModal'
 import DeleteConfirmModal from './_components/DeleteConfirmModal'
+import AdjustStockModal from './_components/AdjustStockModal'
 
 interface Product {
   id: string
@@ -32,6 +33,10 @@ export default function ProductsPage() {
   // Delete modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null)
+
+  // Adjust stock modal
+  const [adjustModalOpen, setAdjustModalOpen] = useState(false)
+  const [adjustingProduct, setAdjustingProduct] = useState<Product | null>(null)
 
   const fetchProducts = useCallback(async (q: string) => {
     setLoading(true)
@@ -68,6 +73,11 @@ export default function ProductsPage() {
   function openDelete(product: Product) {
     setDeletingProduct(product)
     setDeleteModalOpen(true)
+  }
+
+  function openAdjust(product: Product) {
+    setAdjustingProduct(product)
+    setAdjustModalOpen(true)
   }
 
   async function handleDeleteConfirm() {
@@ -176,6 +186,13 @@ export default function ProductsPage() {
                     <td className="px-6 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
+                          onClick={() => openAdjust(p)}
+                          className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+                        >
+                          <SlidersHorizontal className="h-3.5 w-3.5" />
+                          Adjust
+                        </button>
+                        <button
                           onClick={() => openEdit(p)}
                           className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors"
                         >
@@ -213,6 +230,14 @@ export default function ProductsPage() {
         productName={deletingProduct?.name ?? ''}
         onClose={() => { setDeleteModalOpen(false); setDeletingProduct(null) }}
         onConfirm={handleDeleteConfirm}
+      />
+
+      {/* Adjust stock modal */}
+      <AdjustStockModal
+        open={adjustModalOpen}
+        product={adjustingProduct}
+        onClose={() => { setAdjustModalOpen(false); setAdjustingProduct(null) }}
+        onAdjusted={() => fetchProducts(search)}
       />
     </div>
   )

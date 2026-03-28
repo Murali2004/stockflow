@@ -82,6 +82,8 @@ export async function POST(request: NextRequest) {
       return err(`A product with SKU "${sku}" already exists`, 409)
     }
 
+    const userId = request.headers.get('x-user-id')
+
     // Step 4: Create product scoped to this organisation
     const product = await db.product.create({
       data: {
@@ -94,6 +96,7 @@ export async function POST(request: NextRequest) {
         costPrice: costPrice ?? null,
         sellingPrice: sellingPrice ?? null,
         lowStockThreshold: lowStockThreshold ?? null,
+        lastUpdatedBy: userId,
       },
     })
 

@@ -99,6 +99,8 @@ export async function PUT(
       }
     }
 
+    const userId = request.headers.get('x-user-id')
+
     // Step 4: Update
     const product = await db.product.update({
       where: { id },
@@ -110,12 +112,68 @@ export async function PUT(
         costPrice: costPrice ?? null,
         sellingPrice: sellingPrice ?? null,
         lowStockThreshold: lowStockThreshold ?? null,
+        lastUpdatedBy: userId,
       },
     })
 
     return ok({ product })
   } catch (error) {
     console.error('[PUT /api/products/:id]', error)
+    return err('Something went wrong. Please try again.', 500)
+  }
+}
+
+/**
+ * PATCH /api/products/:id
+ *
+ * Adjusts stock quantity by a relative amount (positive or negative).
+ * Used by the "Adjust Stock" control on the products list.
+ *
+ * Body: { adjustment: number }  — e.g. 5 adds 5 units, -3 removes 3 units
+ *
+ * Response: 200 { success: true, data: { product: Product } }
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const orgId = request.headers.get('x-org-id')
+    const userId = request.headers.get('x-user-id')
+    if (!orgId) {
+      return err('Unauthorised', 401)
+    }
+
+    const { id } = await params
+
+    const existing = await findOwnedProduct(id, orgId)
+    if (!existing) {
+      return err('Product not found', 404)
+    }
+
+    const body = await request.json()
+    const adjustment = body.adjustment
+
+    if (typeof adjustment !== 'number' || !Number.isInteger(adjustment)) {
+      return err('adjustment must be an integer', 400)
+    }
+
+    const newQty = existing.quantityOnHand + adjustment
+    if (newQty < 0) {
+      return err('Stock cannot go below zero', 400)
+    }
+
+    const product = await db.product.update({
+      where: { id },
+      data: {
+        quantityOnHand: newQty,
+        lastUpdatedBy: userId,
+      },
+    })
+
+    return ok({ product })
+  } catch (error) {
+    console.error('[PATCH /api/products/:id]', error)
     return err('Something went wrong. Please try again.', 500)
   }
 }

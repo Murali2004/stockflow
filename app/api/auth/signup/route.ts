@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import { signToken, buildSessionCookie } from '@/lib/auth'
 import { signupSchema } from '@/lib/validations'
+import { BCRYPT_SALT_ROUNDS } from '@/lib/constants'
 
 /**
  * POST /api/auth/signup
@@ -40,8 +41,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Step 3: Hash password — bcrypt with cost factor 12
-    const passwordHash = await bcrypt.hash(password, 12)
+    // Step 3: Hash password using configured salt rounds
+    const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS)
 
     // Step 4: Create Organisation and User atomically
     // If either insert fails, both are rolled back

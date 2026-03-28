@@ -1,11 +1,10 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
+import { SESSION_COOKIE_NAME, SESSION_COOKIE_MAX_AGE, JWT_ALGORITHM, JWT_EXPIRY } from '@/lib/constants'
 
-// Cookie name used to store the JWT session token
-const COOKIE_NAME = 'session'
-
-// Cookie expiry: 7 days in seconds
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7
+// Cookie name and expiry pulled from shared constants
+const COOKIE_NAME = SESSION_COOKIE_NAME
+const COOKIE_MAX_AGE = SESSION_COOKIE_MAX_AGE
 
 /**
  * Shape of the JWT payload.
@@ -37,9 +36,9 @@ function getSecret(): Uint8Array {
  */
 export async function signToken(payload: SessionPayload): Promise<string> {
   return new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
+    .setProtectedHeader({ alg: JWT_ALGORITHM })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime(JWT_EXPIRY)
     .sign(getSecret())
 }
 

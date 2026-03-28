@@ -3,25 +3,20 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
 
-/**
- * Login page — form only, layout provided by (auth)/layout.tsx.
- * On success the server sets a session cookie and we redirect to /dashboard.
- */
 export default function LoginPage() {
   const router = useRouter()
   const [form, setForm] = useState({ email: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
-    setError('')
     setLoading(true)
 
     try {
@@ -33,13 +28,14 @@ export default function LoginPage() {
       const data = await res.json()
 
       if (!data.success) {
-        setError(data.error)
+        toast.error('Login failed', { description: data.error })
         return
       }
 
+      toast.success('Welcome back!', { description: 'Redirecting to your dashboard…' })
       router.push('/dashboard')
     } catch {
-      setError('Something went wrong. Please try again.')
+      toast.error('Something went wrong', { description: 'Please try again.' })
     } finally {
       setLoading(false)
     }
@@ -47,20 +43,14 @@ export default function LoginPage() {
 
   return (
     <div>
-      {/* Heading */}
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Welcome back</h2>
-        <p className="mt-2 text-sm text-gray-500">
-          Sign in to continue to your dashboard
-        </p>
+        <p className="mt-2 text-sm text-gray-500">Sign in to continue to your dashboard</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Email */}
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-            Email address
-          </Label>
+          <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email address</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -76,11 +66,8 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Password */}
         <div className="space-y-1.5">
-          <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-            Password
-          </Label>
+          <Label htmlFor="password" className="text-sm font-medium text-gray-700">Password</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -103,22 +90,8 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Error */}
-        {error && (
-          <div className="flex items-center gap-2.5 rounded-lg border border-red-100 bg-red-50 px-3.5 py-3 text-sm text-red-700">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            {error}
-          </div>
-        )}
-
-        <Button
-          type="submit"
-          className="w-full h-11 font-semibold text-sm"
-          disabled={loading}
-        >
-          {loading ? (
-            'Signing in…'
-          ) : (
+        <Button type="submit" className="w-full h-11 font-semibold text-sm" disabled={loading}>
+          {loading ? 'Signing in…' : (
             <span className="flex items-center gap-2">
               Sign in <ArrowRight className="h-4 w-4" />
             </span>
@@ -126,7 +99,6 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      {/* Divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-100" />

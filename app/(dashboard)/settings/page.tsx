@@ -1,17 +1,16 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Settings, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const [threshold, setThreshold] = useState('')
   const [loadingData, setLoadingData] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
 
   useEffect(() => {
     fetch('/api/settings')
@@ -20,16 +19,16 @@ export default function SettingsPage() {
         if (data.success) {
           const val = data.data.settings.defaultLowStockThreshold
           setThreshold(val != null ? String(val) : '')
+        } else {
+          toast.error('Failed to load settings')
         }
       })
-      .catch(() => setError('Failed to load settings.'))
+      .catch(() => toast.error('Failed to load settings'))
       .finally(() => setLoadingData(false))
   }, [])
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
-    setError('')
-    setSuccess(false)
     setSaving(true)
 
     try {
@@ -43,14 +42,13 @@ export default function SettingsPage() {
       const data = await res.json()
 
       if (!data.success) {
-        setError(data.error)
+        toast.error('Save failed', { description: data.error })
         return
       }
 
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      toast.success('Settings saved', { description: 'Your preferences have been updated.' })
     } catch {
-      setError('Something went wrong. Please try again.')
+      toast.error('Something went wrong', { description: 'Please try again.' })
     } finally {
       setSaving(false)
     }
@@ -58,13 +56,11 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Settings</h1>
         <p className="mt-1 text-sm text-gray-500">Manage your organisation preferences.</p>
       </div>
 
-      {/* Settings card */}
       <form onSubmit={handleSubmit}>
         <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
           <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
@@ -101,20 +97,6 @@ export default function SettingsPage() {
             )}
           </div>
         </div>
-
-        {/* Feedback */}
-        {error && (
-          <div className="mt-4 flex items-center gap-2.5 rounded-lg border border-red-100 bg-red-50 px-3.5 py-3 text-sm text-red-700">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="mt-4 flex items-center gap-2.5 rounded-lg border border-green-100 bg-green-50 px-3.5 py-3 text-sm text-green-700">
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-            Settings saved successfully.
-          </div>
-        )}
 
         <div className="mt-6">
           <Button type="submit" disabled={saving || loadingData} className="min-w-[120px]">

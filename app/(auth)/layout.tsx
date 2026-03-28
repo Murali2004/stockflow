@@ -106,7 +106,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         <div className="flex flex-1 items-center justify-center px-8 py-6">
           {/* Form card with subtle shadow */}
-          <div className="w-full max-w-[400px] rounded-2xl bg-white px-8 py-8 shadow-sm ring-1 ring-gray-100">
+          <div className="w-full max-w-[400px] rounded-2xl bg-white px-8 py-6 shadow-sm ring-1 ring-gray-100">
             {children}
           </div>
         </div>

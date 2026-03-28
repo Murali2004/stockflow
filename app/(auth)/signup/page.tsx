@@ -45,16 +45,15 @@ export default function SignupPage() {
     }
   }
 
-  const inputClass = 'h-11 border-gray-200 focus:border-primary focus:ring-primary/20 bg-gray-50 focus:bg-white transition-colors'
+  const inputClass = 'h-10 border-gray-200 focus:border-primary focus:ring-primary/20 bg-gray-50 focus:bg-white transition-colors'
 
   return (
     <div>
-      <div className="mb-5">
-        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Create your account</h2>
-        <p className="mt-2 text-sm text-gray-500">Start managing your inventory in minutes — free forever</p>
+      <div className="mb-4">
+        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Create your account</h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-2.5">
         <div className="space-y-1.5">
           <Label htmlFor="orgName" className="text-sm font-medium text-gray-700">Organisation name</Label>
           <div className="relative">
@@ -73,7 +72,7 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="password" className="text-sm font-medium text-gray-700">Password</Label>
             <div className="relative">
@@ -98,7 +97,7 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full h-11 font-semibold text-sm mt-1" disabled={loading}>
+        <Button type="submit" className="w-full h-10 font-semibold text-sm mt-1" disabled={loading}>
           {loading ? 'Creating account…' : (
             <span className="flex items-center gap-2">
               Create account <ArrowRight className="h-4 w-4" />
@@ -107,7 +106,7 @@ export default function SignupPage() {
         </Button>
       </form>
 
-      <div className="relative my-4">
+      <div className="relative my-3">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-100" />
         </div>

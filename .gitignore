@@ -131,7 +131,7 @@ dist
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
-<<<<<<< HEAD
+!.yarn/sdks
 !.yarn/versions
 
 # testing
@@ -163,11 +163,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-=======
-!.yarn/sdks
-!.yarn/versions
 
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
->>>>>>> dc6bc8c7c0b53be65b01a29d13cad74db83deffe
+
+# local docs / reference files
+/doc
+
+# Claude Code internal files
+/.claude
